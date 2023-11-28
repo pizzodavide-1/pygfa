@@ -7,7 +7,6 @@ import difflib
 import logging
 
 from Bio import SeqIO
-
 GRAPH_LOGGER = logging.getLogger(__name__)
 
 def reverse_and_complement(string):

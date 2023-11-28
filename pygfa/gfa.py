@@ -1145,5 +1145,17 @@ class GFA(DovetailIterator):
     def subgraphs_extractor(self, n_source, distance):
         extract_subgraph(self, n_source, distance)
 
+
+    def concat_path_sequences(self, path_id):
+        path=self.get_subgraph(path_id) 
+        finale=""
+        nodes=path.nodes()
+        for nodo in nodes:
+            n=self.get(nodo)
+            finale= finale+n['sequence']
+        return finale
+
+
+
 if __name__ == '__main__': #pragma: no cover
     pass
