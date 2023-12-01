@@ -64,6 +64,10 @@ print(vicini)
 n1=test2_graph.from_string("S	11	ACCTT") #aggiunto
 n2=test2_graph.from_string("S	12	TCAAGG")
 n3=test2_graph.from_string("S	13	CTTGATT")
+n4=test2_graph.from_string("S	14	GAAC")
+n5=test2_graph.from_string("S	15	ATT")
+n6=test2_graph.from_string("S	16	AAAAA")
+
 test2_graph.from_string("L	11	+	12	-	4M") #LINK FROM STRING
 
 #print(test2_graph.get("11")) #stampo
@@ -114,30 +118,33 @@ edges=test2_graph.edges()
 nodi=nodes=test2_graph.nodes()
 archi=test2_graph.edges()
 print(nodi)
-print (archi)
+
 ###########################################################ààà
 #####PATH#####
 path=Path()
-fieldNamePath=Field(name='path_name', value='14')
+fieldNamePath=Field(name='path_name', value='15')
 fieldSegmentNames=Field(name='seqs_names', value='11+,12-,13+')
 fieldOverlaps=Field(name='overlaps', value='4M,5M')
 path.add_field(fieldNamePath)
 path.add_field(fieldSegmentNames)
 path.add_field(fieldOverlaps)
 sottogr=Subgraph(graph_id='15' , elements={'seqs_name':'	11+,12-,13+','overlaps':'	4M,5M'})#sottografo ma non cammino
-test2_graph.add_subgraph(sottogr)
+#test2_graph.add_subgraph(sottogr)
 #HO CREATO UN SOTTOGRAFO PASSANDOGLI UN CAMMINO
-test2_graph.from_string("P	14	11+,12-,13+	4M,5M")
-print(test2_graph.subgraphs()) #restituisce un dizionario con i sottografi
-subgfa=test2_graph.get_subgraph('14') #RESTITUISCE IL GFA EQUIVALENTE AL SOTTOGRFAFO FORMATO COL CAMMINO(Un gfa indipendente dal resto)
-print(subgfa)
-snodes=subgfa.nodes()
-sedges=subgfa.edges()
-print(snodes)
-print(sedges)
-ss=test2_graph.subgraphs('14')
-print(ss)
+test2_graph.from_string("P	10	11+,12-,13+	4M,5M")
+test2_graph.from_string("P	17	11-,12-,15+	4M,2M")
+test2_graph.from_string("P	18	14-,16+	3M")
+#sottogr18=test2_graph.subgraphs('18')
+gr18=test2_graph.get_subgraph('18')
+print(gr18.nodes())
+print(gr18.edges())
+test2_graph.from_string("L	14	-	16	+	3M")
+#subgfa=test2_graph.get_subgraph('18') #RESTITUISCE IL GFA EQUIVALENTE AL SOTTOGRFAFO FORMATO COL CAMMINO(Un gfa indipendente dal resto)
+#ss=test2_graph.subgraphs('15')
+#print(ss)
 #sottogr=test2_graph.subgraph(('12', '13','6')) #dati un bunch di nodi ci dice un sottografo di tot nodi e archi
 #print(sottogr)
 ###########################################################
-print(test2_graph.concat_path_sequences('14'))
+print(test2_graph.concat_path_sequences('17'))
+
+

@@ -14,6 +14,9 @@ import re
 import os
 import warnings
 
+import argparse
+import inspect
+
 import networkx as nx
 from networkx.classes.function import all_neighbors as nx_all_neighbors
 
@@ -712,11 +715,28 @@ class GFA(DovetailIterator):
                 "There is no subgraph pointed by this key.")
         subgraph = self._subgraphs[sub_key]
         sub_gfa = GFA()
+        templst=[] #temporary list  used later to add the edges to the subgraph [(node,orientation)]
         for id_, orn in subgraph.elements.items():
             # creating a new GFA graph and the add method,
             # the virtual id are recomputed
             sub_gfa.add_graph_element(self.as_graph_element(id_))
-        return sub_gfa
+            templst.append((id_,orn))
+        if len(templst)>=2: #if there are more than 1 node,then there are edges
+            for i in range(len(templst) - 1): #add edges to the subgraph
+                tuple1=templst[i]
+                tuple2=templst[i+1]
+                fromnode=tuple1[0]
+                fromor=tuple1[1]
+                tonode=tuple2[0]
+                toor=tuple2[1]
+
+                arco='L'+'\t'+fromnode+'\t'+fromor+'\t'+tonode+'\t'+toor+'\t'+'0M'
+                #sub_gfa.from_string(arco)
+                sub_gfa.add_edge(arco)
+
+
+
+            return sub_gfa
 
 
     def subgraph(self, nbunch, copy=True):
@@ -1146,16 +1166,38 @@ class GFA(DovetailIterator):
         extract_subgraph(self, n_source, distance)
 
 
+    def reverse_complement(self,sequence):
+        complement = {'A': 'T', 'T': 'A', 'C': 'G', 'G': 'C'}
+        reverse_comp_seq = ''.join(complement[nucleotide] for nucleotide in reversed(sequence))
+        return reverse_comp_seq
+
     def concat_path_sequences(self, path_id):
-        path=self.get_subgraph(path_id) 
-        finale=""
-        nodes=path.nodes()
-        for nodo in nodes:
-            n=self.get(nodo)
-            finale= finale+n['sequence']
-        return finale
-
-
+        cont=0
+        path=self.get_subgraph(path_id)
+        sequence=""
+        edges = path.edges()
+        nodes = path.nodes()
+        for arco in edges: #Problema capire come stampare bene
+            edge=path.get('virtual_'+str(cont))
+            fromOrientation=edge['from_orn']
+            toOrientaion=edge['to_orn']
+            fromNode=edge['from_node']
+            toNode=edge['to_node']
+            if cont==0:
+                node=path.get(fromNode)
+                if fromOrientation=='+':
+                    sequence = sequence + node['sequence']
+                elif fromOrientation=='-':
+                    sequenceNode=node['sequence']
+                    sequence = sequence + path.reverse_complement(sequenceNode)
+            node=path.get(toNode)
+            if toOrientaion == '+':
+                sequence = sequence + node['sequence']
+            elif toOrientaion == '-':
+                sequenceNode = node['sequence']
+                sequence = sequence + path.reverse_complement(sequenceNode)
+            cont += 1
+        return sequence
 
 if __name__ == '__main__': #pragma: no cover
     pass
