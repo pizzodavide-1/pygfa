@@ -67,7 +67,6 @@ n3=test2_graph.from_string("S	13	CTTGATT")
 n4=test2_graph.from_string("S	14	GAAC")
 n5=test2_graph.from_string("S	15	ATT")
 n6=test2_graph.from_string("S	16	AAAAA")
-
 test2_graph.from_string("L	11	+	12	-	4M") #LINK FROM STRING
 
 #print(test2_graph.get("11")) #stampo
@@ -145,6 +144,42 @@ test2_graph.from_string("L	14	-	16	+	3M")
 #sottogr=test2_graph.subgraph(('12', '13','6')) #dati un bunch di nodi ci dice un sottografo di tot nodi e archi
 #print(sottogr)
 ###########################################################
-print(test2_graph.concat_path_sequences('17'))
+print(test2_graph.concat_path_sequences('18'))
+##########################################################
+##########################################################
+##########################################################
+##########################################################
+##########################################################
+grafo2=GFA()
+grafo2.from_string("S	1	ACCTT")
+grafo2.from_string("S	2	GGATT")
+grafo2.from_string("S	3	CCCCC")
+grafo2.from_string("S	4	ACCTT")
+grafo2.from_string("S	5	GGATT")
+grafo2.from_string("S	6	CCCCC")
+
+grafo2.from_string("L	1	+	2	-	0M")
+grafo2.from_string("L	2	+	3	-	0M")
+grafo2.from_string("L	4	+	2	-	0M")
+grafo2.from_string("L	2	+	5	-	0M")
+grafo2.from_string("L	3	+	6	-	0M")
+grafo2.from_string("L	6	+	2	-	0M")
+grafo2.from_string("L	3	+	5	-	0M")
+grafo2.from_string("L	5	+	6	-	0M")
+grafo2.from_string("L	3	+	4	-	0M")
+
+print("Nodi:")
+print(grafo2.nodes())
+print("Archi:")
+print(grafo2.edges())
+
+grafo2.remove_node_and_merge('2',1)
+
+print("Nodi:")
+print(grafo2.nodes())
+print("Archi:")
+print(grafo2.edges())
+
+
 
 

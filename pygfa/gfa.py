@@ -1177,7 +1177,7 @@ class GFA(DovetailIterator):
         sequence=""
         edges = path.edges()
         nodes = path.nodes()
-        for arco in edges: #Problema capire come stampare bene
+        for arco in edges:
             edge=path.get('virtual_'+str(cont))
             fromOrientation=edge['from_orn']
             toOrientaion=edge['to_orn']
@@ -1198,6 +1198,100 @@ class GFA(DovetailIterator):
                 sequence = sequence + path.reverse_complement(sequenceNode)
             cont += 1
         return sequence
+
+
+    def remove_node_and_merge(self, nid, mod):
+        """Given a Node id , eliminates the node with that id, if it exists,
+            and creates connection arcs between adjacent nodes based on the mod (1 or 2)
+
+               :param nid: NodeId.
+               :param mod: if==1-->creates all edges between all predecessors and successors of the deleted node
+                           if==2-->creates an edge (a,b) (pred,succ) only if 'a' and 'b' are  on a path
+               """
+        if mod != 1 and mod!=2:
+            raise ValueError("Value of 'mod' must be 1 or 2")
+        if nid not in self.nodes():
+            raise ValueError(f"Node with ID {nid} not found in the graph.")
+        if len(self.neighbors(nid))==1:
+            self.remove_node(nid)  #remove nid and the only adj edge
+            return
+        elif len(self.neighbors(nid))==0:
+            print(f"Node with ID {nid} doesn't have adjacent edges.")
+        else:
+         if mod==1:
+          edges=self.edges() #contains all edges
+          edgesList = list(edges)
+          nidEdgesList= [] #will contain edge with nid
+          for e in edges:
+             n1= e[0]
+             n2= e[1]
+             if n1==nid or n2==nid:
+                 nidEdgesList.append(e)
+          for i in range(len(nidEdgesList)):
+              edge=nidEdgesList[i]
+              if edge[0] != nid:
+                  fromPos= edge[0]
+              else:
+                  fromPos = edge[1]
+
+              for j in range(len(nidEdgesList)):
+                  if i!=j:
+                     edge2= nidEdgesList[j]
+                     if edge2[0]!=nid:
+                         toPos= edge2[0]
+                     else:
+                         toPos = edge2[1]
+                     if(fromPos < toPos):
+                         edgeTuple=(fromPos,toPos)
+                     else:
+                         edgeTuple=(toPos,fromPos)
+                     if edgeTuple not in edgesList:
+                         edgesList.append(edgeTuple)
+                         self.from_string("L"+"\t"+fromPos+"\t"+"+"+\
+                                          "\t"+toPos+"\t"+"+"+"\t"+"0M")
+          #self.remove_node(nid)
+
+         elif mod==2:
+             edges = self.edges()  # contains all edges
+             edgesList = list(edges)
+
+             for i in range(0 , len(edgesList)):
+                 edge1 = self.get('virtual_' + str(i))
+                 frompos=edge1['from_node']
+                 topos=edge1['to_node']
+                 fromorn= edge1['from_orn']
+                 toorn= edge1['to_orn']
+                 for j in range(len(edgesList)):
+                     if i != j: 
+                         edge2=self.get('virtual_'+str(j))
+                         frompos2=edge2['from_node']
+                         topos2=edge2['to_node']
+                         fromorn2 = edge2['from_orn']
+                         toorn2 = edge2['to_orn']
+                         if frompos==nid and topos2==nid:
+                             if topos < frompos2: #in self.edges,edges are (a,b) where a<b
+                              if ((topos, frompos2)) not in edgesList: #check if the arch already exists
+                               self.from_string("L"+"\t"+topos+"\t"+toorn+"\t"\
+                                                +frompos2+"\t"+fromorn2+"\t"+"0M")
+                               edgesList.append((topos , frompos2))
+                              elif frompos2<topos: #in self.edges,edges are (a,b) where a<b
+                               if ((frompos2, topos)) not in edgesList: #check if the arch already exists
+                                 self.from_string("L" + "\t" + topos + "\t" + toorn + "\t" +\
+                                                  frompos2 + "\t" + fromorn2 + "\t" + "0M")
+                                 edgesList.append((frompos2, topos))
+
+                         elif topos==nid and frompos2==nid:
+                                 if frompos < topos2:
+                                   if((frompos, topos2)) not in edgesList: #in self.edges,edges are (a,b) where a<b
+                                    self.from_string("L"+"\t"+frompos+"\t"+fromorn+"\t"+topos2+"\t"+\
+                                                     toorn2+"\t"+"0M")
+                                    edgesList.append((frompos, topos2))
+                                 elif topos2<frompos: #in self.edges,edges are (a,b) where a<b
+                                   if ((topos2, frompos)) not in edgesList:
+                                    self.from_string( "L" + "\t" + frompos + "\t" + fromorn + "\t" +\
+                                                      topos2 + "\t" + toorn2 + "\t" + "0M")
+                                    edgesList.append((topos2, frompos))
+        self.remove_node(nid)
 
 if __name__ == '__main__': #pragma: no cover
     pass
