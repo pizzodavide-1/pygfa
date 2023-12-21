@@ -41,6 +41,7 @@ class GFAError(Exception):
     pass
 
 
+
 class Element:
     """Represent the types of graph a GFA graph object can have.
     """
@@ -97,6 +98,8 @@ class GFA(DovetailIterator):
         self._next_virtual_id = 0 if base_graph is None else \
                                 self._find_max_virtual_id()
         self._is_rGFA = is_rGFA
+        self.PATHLIST=[]
+        self.idPaths=[]
 
     def __contains__(self, id_):
         try:
@@ -373,6 +376,11 @@ class GFA(DovetailIterator):
         """
         try:
             self._graph.remove_node(nid)
+            ###add to manage the list of paths##########
+            for p in self.PATHLIST:
+                if nid in p:
+                    p.remove(nid)
+         #############################################
         except:
             raise node.InvalidNodeError("{0} doesn't point".format(nid) \
                                         + " to any node in the graph.")
@@ -655,10 +663,10 @@ class GFA(DovetailIterator):
         A deepcopy of the object given is attached to the graph.
         """
         if isinstance(subgraph, str):
-            if subgraph[0] == "P":
-                subgraph = sg.Subgraph.from_line(\
-                    path.Path.from_string(subgraph))
-            elif subgraph[0] == "O":
+            #if subgraph[0] == "P":
+            #    subgraph = sg.Subgraph.from_line(\
+            #        path.Path.from_string(subgraph))
+            if subgraph[0] == "O":
                 subgraph = sg.Subgraph.from_line(\
                     group.OGroup.from_string(subgraph))
             elif subgraph[0] == "U":
@@ -946,9 +954,14 @@ class GFA(DovetailIterator):
                     ge.Edge.from_line(\
                         fragment.Fragment.from_string(line_)))
             elif line_[0] == 'P':
-                self.add_graph_element(\
-                    sg.Subgraph.from_line(\
-                        path.Path.from_string(line_)))
+                #self.add_graph_element(\
+                 #   sg.Subgraph.from_line(\
+                  #      path.Path.from_string(line_)))
+                self.PATHLIST.append(sg.Subgraph.from_line(\
+                    path.Path.from_string(line_))[0])
+                self.idPaths.append(sg.Subgraph.from_line(\
+                    path.Path.from_string(line_))[1])
+
             elif line_[0] == 'O':
                 self.add_graph_element(\
                     sg.Subgraph.from_line(\
@@ -1292,6 +1305,23 @@ class GFA(DovetailIterator):
                                                       topos2 + "\t" + toorn2 + "\t" + "0M")
                                     edgesList.append((topos2, frompos))
         self.remove_node(nid)
+
+    def paths(self):
+        if len(self.PATHLIST)==0:
+            raise ValueError("Graph has no paths")
+        return self.PATHLIST
+
+    def id_paths(self):
+        if len(self.idPaths)==0:
+            raise ValueError("Graph has no paths")
+        return self.idPaths
+
+    def get_paths_with_id(self):
+        dict={}
+        for id_path, path in zip(self.idPaths, self.PATHLIST):
+            dict[id_path] = path
+        return dict
+
 
 if __name__ == '__main__': #pragma: no cover
     pass

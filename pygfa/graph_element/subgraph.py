@@ -81,10 +81,12 @@ class Subgraph:
                 names = collections.OrderedDict(\
                             (ref[0:-1], ref[-1:]) \
                                 for ref in line_.fields['seqs_names'].value)
-                return Subgraph( \
-                                line_.fields['path_name'].value, \
-                                names, \
-                                fields)
+                idPath=line_.fields['path_name'].value
+                return (list(names), idPath)
+                #return Subgraph( \
+                 #               line_.fields['path_name'].value, \
+                  #              names, \
+                   #             fields)
             if line_.type == 'O':
                 fields.pop('oid')
                 fields.pop('references')

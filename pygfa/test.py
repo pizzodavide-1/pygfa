@@ -132,11 +132,11 @@ sottogr=Subgraph(graph_id='15' , elements={'seqs_name':'	11+,12-,13+','overlaps'
 #HO CREATO UN SOTTOGRAFO PASSANDOGLI UN CAMMINO
 test2_graph.from_string("P	10	11+,12-,13+	4M,5M")
 test2_graph.from_string("P	17	11-,12-,15+	4M,2M")
-test2_graph.from_string("P	18	14-,16+	3M")
+#test2_graph.from_string("P	18	14-,16+	3M")
 #sottogr18=test2_graph.subgraphs('18')
-gr18=test2_graph.get_subgraph('18')
-print(gr18.nodes())
-print(gr18.edges())
+#gr18=test2_graph.get_subgraph('18')
+#print(gr18.nodes())
+#print(gr18.edges())
 test2_graph.from_string("L	14	-	16	+	3M")
 #subgfa=test2_graph.get_subgraph('18') #RESTITUISCE IL GFA EQUIVALENTE AL SOTTOGRFAFO FORMATO COL CAMMINO(Un gfa indipendente dal resto)
 #ss=test2_graph.subgraphs('15')
@@ -144,7 +144,7 @@ test2_graph.from_string("L	14	-	16	+	3M")
 #sottogr=test2_graph.subgraph(('12', '13','6')) #dati un bunch di nodi ci dice un sottografo di tot nodi e archi
 #print(sottogr)
 ###########################################################
-print(test2_graph.concat_path_sequences('18'))
+#print(test2_graph.concat_path_sequences('18'))
 ##########################################################
 ##########################################################
 ##########################################################
@@ -168,6 +168,17 @@ grafo2.from_string("L	3	+	5	-	0M")
 grafo2.from_string("L	5	+	6	-	0M")
 grafo2.from_string("L	3	+	4	-	0M")
 
+#grafo2.add_subgraph("P	10	1+,2-,3-,6-	3M,5M,0M,1M")
+grafo2.from_string("P	10	1+,2-,3-	3M,5M,0M,1M")
+grafo2.from_string("P	11	1+,2-,4+	4M,2M,1M,0M")
+grafo2.from_string("P	12	2+,1-	3M,5M,0M,1M")
+grafo2.from_string("P	13	4+,5-,6-	4M,2M,1M,0M")
+
+print(grafo2.get('10'))
+print(grafo2.dump(1))
+
+#TEST REMOVENODEANDMERGE
+"""""
 print("Nodi:")
 print(grafo2.nodes())
 print("Archi:")
@@ -179,6 +190,15 @@ print("Nodi:")
 print(grafo2.nodes())
 print("Archi:")
 print(grafo2.edges())
+"""""
+
+print(grafo2.paths())
+grafo2.remove_node_and_merge('2',1)
+print(grafo2.paths())
+print(grafo2.get_paths_with_id())
+
+
+
 
 
 
