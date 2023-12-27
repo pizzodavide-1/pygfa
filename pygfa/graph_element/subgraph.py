@@ -82,7 +82,7 @@ class Subgraph:
                             (ref[0:-1], ref[-1:]) \
                                 for ref in line_.fields['seqs_names'].value)
                 idPath=line_.fields['path_name'].value
-                return (list(names), idPath)
+                return (list(names.items()), idPath)
                 #return Subgraph( \
                  #               line_.fields['path_name'].value, \
                   #              names, \

@@ -1185,33 +1185,18 @@ class GFA(DovetailIterator):
         return reverse_comp_seq
 
     def concat_path_sequences(self, path_id):
-        cont=0
-        path=self.get_subgraph(path_id)
+        path=self.get_paths_with_id()[path_id]
         sequence=""
-        edges = path.edges()
-        nodes = path.nodes()
-        for arco in edges:
-            edge=path.get('virtual_'+str(cont))
-            fromOrientation=edge['from_orn']
-            toOrientaion=edge['to_orn']
-            fromNode=edge['from_node']
-            toNode=edge['to_node']
-            if cont==0:
-                node=path.get(fromNode)
-                if fromOrientation=='+':
-                    sequence = sequence + node['sequence']
-                elif fromOrientation=='-':
-                    sequenceNode=node['sequence']
-                    sequence = sequence + path.reverse_complement(sequenceNode)
-            node=path.get(toNode)
-            if toOrientaion == '+':
-                sequence = sequence + node['sequence']
-            elif toOrientaion == '-':
-                sequenceNode = node['sequence']
-                sequence = sequence + path.reverse_complement(sequenceNode)
-            cont += 1
+        for segment in path:
+            idSegment=segment[0]
+            ornSegment=segment[1]
+            node=self.get(idSegment)
+            if ornSegment=='+':
+                sequence=sequence + node['sequence']
+            elif ornSegment=='-':
+                sequenceSegment=node['sequence']
+                sequence= sequence + self.reverse_complement(sequenceSegment)
         return sequence
-
 
     def remove_node_and_merge(self, nid, mod):
         """Given a Node id , eliminates the node with that id, if it exists,

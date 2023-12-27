@@ -193,11 +193,12 @@ print(grafo2.edges())
 """""
 
 print(grafo2.paths())
-grafo2.remove_node_and_merge('2',1)
+#grafo2.remove_node_and_merge('2',1)
 print(grafo2.paths())
 print(grafo2.get_paths_with_id())
 
 
+print(grafo2.concat_path_sequences('10'))
 
 
 
