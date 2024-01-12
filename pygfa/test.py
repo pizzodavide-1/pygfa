@@ -15,37 +15,37 @@ from graph_element.parser.path import Path
 
 ############################################
 #TEST CREO GRAFO CON 1000 NODI 2000 GRAFI E CI OPERO SOPRA
-
+"""""
 test2_graph=GFA()
 nucleotidi = "ACGT"
-"""
-randomEid=random.randint(0,98)
-for nid in range(99):
+
+randomEid=random.randint(0,999999)
+for nid in range(1000000):
     lungh = random.randint(4, 10)
     seq=''.join(random.choice(nucleotidi) for _ in range(lungh))
     nodo=Node(node_id=str(nid), sequence=seq, length=len(seq))
-    print(nodo.sequence)
+    #print(nodo.sequence)
     test2_graph.add_node(nodo)
 
 #nodes=test2_graph.nodes()
 #print (nodes)
 
-for eid in range(199):
-    nodoCasuale=random.randint(0,98)
-    nodoCasuale2=random.randint(0,98)
+for eid in range(2000000):
+    nodoCasuale=random.randint(0,999999)
+    nodoCasuale2=random.randint(0,999999)
 
     arco=Edge(edge_id=str(eid), from_node=str(nodoCasuale), from_orn=random.choice(['+','-']) , to_node=str(nodoCasuale2), to_orn=random.choice(['+','-']),from_positions=(0,0) , to_positions=(0,0) ,alignment="")
     test2_graph.add_edge(arco)
-    if arco.from_node== str(randomEid) or arco.to_node==str(randomEid): #stampo idnodi collegati al id casuale per controllo
-        print(arco)
+    #if arco.from_node== str(randomEid) or arco.to_node==str(randomEid): #stampo idnodi collegati al id casuale per controllo
+     #   print(arco)
 
 edges=test2_graph.edges()
-print(edges) #stampo archi
+print("TOP") #stampo archi
 
 vicini=test2_graph.neighbors(str(randomEid)) #stampo i vicini di un nodo casuale
 print("I vicini del nodo con edi=" + str(randomEid) + "sono:")
 print(vicini)
-"""
+
 ################################################################
 #NODO DA LINEA
 #nome=input("Inserire id Segmento:")
@@ -150,6 +150,7 @@ test2_graph.from_string("L	14	-	16	+	3M")
 ##########################################################
 ##########################################################
 ##########################################################
+"""""
 grafo2=GFA()
 grafo2.from_string("S	1	ACCTT")
 grafo2.from_string("S	2	GGATT")
@@ -174,33 +175,70 @@ grafo2.from_string("P	11	1+,2-,4+	4M,2M,1M,0M")
 grafo2.from_string("P	12	2+,1-	3M,5M,0M,1M")
 grafo2.from_string("P	13	4+,5-,6-	4M,2M,1M,0M")
 
-print(grafo2.get('10'))
-print(grafo2.dump(1))
+#print(grafo2.get('10'))
+#print(grafo2.dump(1))
 
 #TEST REMOVENODEANDMERGE
-"""""
-print("Nodi:")
-print(grafo2.nodes())
-print("Archi:")
-print(grafo2.edges())
+
+#print("Nodi:")
+#print(grafo2.nodes())
+#print("Archi:")
+#print(grafo2.edges())
 
 grafo2.remove_node_and_merge('2',1)
 
-print("Nodi:")
-print(grafo2.nodes())
-print("Archi:")
-print(grafo2.edges())
-"""""
+#print("Nodi:")
+#print(grafo2.nodes())
+#print("Archi:")
+#print(grafo2.edges())
 
-print(grafo2.paths())
+
+#print(grafo2.paths())
 #grafo2.remove_node_and_merge('2',1)
-print(grafo2.paths())
-print(grafo2.get_paths_with_id())
+#print(grafo2.paths())
+#print(grafo2.get_paths_with_id())
 
 
-print(grafo2.concat_path_sequences('10'))
+#print(grafo2.concat_path_sequences('10'))
+################################################################################
+g3=GFA()
 
+g3.from_string("S	1	ACCTT")
+g3.from_string("S	2	GGATT")
+g3.from_string("S	3	CCCCC")
+g3.from_string("S	4	ACCTT")
+g3.from_string("S	5	GGATT")
+g3.from_string("S	6	CCCCC")
+g3.from_string("S	7	GGATT")
+g3.from_string("S	8	CCCCC")
+g3.from_string("S	9	GGATT")
+g3.from_string("S	10	CCCCC")
+g3.from_string("S	11	CCCCC")
+g3.from_string("S	12	GGATT")
+g3.from_string("S	13	CCCCC")
 
+g3.from_string("L	1	+	2	-	0M")
+g3.from_string("L	2	+	3	-	0M")
+g3.from_string("L	4	+	2	-	0M")
+g3.from_string("L	2	+	5	-	0M")
+g3.from_string("L	3	+	6	-	0M")
+g3.from_string("L	1	+	7	-	0M")
+g3.from_string("L	7	+	8	-	0M")
+g3.from_string("L	3	+	7	-	0M")
+g3.from_string("L	4	+	9	-	0M")
+g3.from_string("L	3	+	10	-	0M")
+g3.from_string("L	10	+	11	-	0M")
+g3.from_string("L	11	+	12	-	0M")
+g3.from_string("L	12	+	13	-	0M")
+
+print(g3.neighbors('2'))
+#print(g3.extract_Subgraph_from_neighborhood(nid='2', len=3).nodes())
+#print(g3.extract_Subgraph_from_neighborhood(nid='2', len=3).edges())
+
+sg=g3.extract_Subgraph_from_neighborhood(nid='2', len=0,)
+print(sg.nodes())
+print(sg.edges()) #QUESITO: E' POSSIBILE FAR SI CHE LA FUNZIONE CREI UN SOTTOGRAFO PARTENDO DA QUESTO GFA?
+#print(sg)
 
 
 

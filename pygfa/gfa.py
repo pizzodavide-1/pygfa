@@ -1252,14 +1252,20 @@ class GFA(DovetailIterator):
          elif mod==2:
              edges = self.edges()  # contains all edges
              edgesList = list(edges)
+             nidEdgesList = []  # will contain edge with nid
+             for e in edges:
+                 n1 = e[0]
+                 n2 = e[1]
+                 if n1 == nid or n2 == nid:
+                     nidEdgesList.append(e)
 
-             for i in range(0 , len(edgesList)):
+             for i in range(0 , len(nidEdgesList)):
                  edge1 = self.get('virtual_' + str(i))
                  frompos=edge1['from_node']
                  topos=edge1['to_node']
                  fromorn= edge1['from_orn']
                  toorn= edge1['to_orn']
-                 for j in range(len(edgesList)):
+                 for j in range(len(nidEdgesList)):
                      if i != j: 
                          edge2=self.get('virtual_'+str(j))
                          frompos2=edge2['from_node']
@@ -1294,7 +1300,8 @@ class GFA(DovetailIterator):
     def paths(self):
         if len(self.PATHLIST)==0:
             raise ValueError("Graph has no paths")
-        return self.PATHLIST
+        segmentsPath = [[tupla[0] for tupla in path] for path in self.PATHLIST]
+        return segmentsPath
 
     def id_paths(self):
         if len(self.idPaths)==0:
@@ -1303,9 +1310,41 @@ class GFA(DovetailIterator):
 
     def get_paths_with_id(self):
         dict={}
-        for id_path, path in zip(self.idPaths, self.PATHLIST):
+        for id_path, path in zip(self.idPaths, [[(tupla[0], tupla[1]) for tupla in path] for path in self.PATHLIST]):
             dict[id_path] = path
         return dict
+
+    def extract_Subgraph_from_neighborhood(self, nid , len ):
+        """""
+        returns a GFA representing the subgraph created from the
+         neighborhood of length 'len' from the node 'nid'
+        param:
+            nid-->id of the node from which the subgraph is created
+            len-->length of the node neighborhood
+        """""
+        sg=GFA()
+        if len<1:
+            raise ValueError("Value of 'len' must be 1 or higher")
+        nodes=[nid]
+        edges=[]
+        nodesTemp = []
+        for i in range(0, len):
+            nodes.extend(nodesTemp)
+            nodesTemp=[]
+            for node in nodes:
+                mainNode=self.get(node)
+                neighborList=self.neighbors(node)
+                for neighbor in neighborList:
+                    if not(neighbor in nodes):
+                        currentNode=self.get(neighbor)
+                        sg.add_node("S\t"+currentNode['nid']+"\t"+currentNode['sequence'])
+                        nodesTemp.append(currentNode['nid'])
+                    if not(((node,neighbor)in edges)or(neighbor,node)in edges)and (not(node==neighbor)):
+                        sg.add_edge("L\t"+mainNode['nid']+"\t+\t"+currentNode['nid']+"\t-"+"\t0M")
+                        edges.append((node,neighbor))
+            #nodes.extend(neighborList)
+
+        return sg
 
 
 if __name__ == '__main__': #pragma: no cover
