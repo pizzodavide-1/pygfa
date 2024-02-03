@@ -230,15 +230,39 @@ g3.from_string("L	3	+	10	-	0M")
 g3.from_string("L	10	+	11	-	0M")
 g3.from_string("L	11	+	12	-	0M")
 g3.from_string("L	12	+	13	-	0M")
+g3.from_string("L	1	+	4	-	0M")
+g3.from_string("L	9	+	10	-	0M")
+g3.from_string("L	10	+	8	-	0M")
+g3.from_string("L	8	+	1	-	0M")
+g3.from_string("L	4	+	10	-	0M")
 
-print(g3.neighbors('2'))
-#print(g3.extract_Subgraph_from_neighborhood(nid='2', len=3).nodes())
-#print(g3.extract_Subgraph_from_neighborhood(nid='2', len=3).edges())
+g3.from_string("P	P1	1+,2+,3+,10+	3M,5M,0M")
+g3.from_string("P	P2	1+,4+,10+	4M,2M")
+g3.from_string("P	P3	1-,2+,5-	3M,1M")
+g3.from_string("P	P4	1+,7+	2M")
+g3.from_string("P	P5	9+,10+,11-,12+	3M,5M,0M")
+g3.from_string("P	P6	1+,4+,11+	4M,2M")
+g3.from_string("P	P7	10-,8+,1-	3M,1M")
+g3.from_string("P	P8	3-,6+	2M")
+g3.from_string("P	P9	1+,4+,2-,3+,10+	3M,1M,3M,2M")
+g3.from_string("P	P10	1-,4+,9+	2M,1M")
 
-sg=g3.extract_Subgraph_from_neighborhood(nid='2', len=0,)
+
+#print(g3._found_paths(source='1',destination='10'))
+sg=g3.get_subgraph_between_nodes(source='1', destination='10',orientation=True)
+
 print(sg.nodes())
-print(sg.edges()) #QUESITO: E' POSSIBILE FAR SI CHE LA FUNZIONE CREI UN SOTTOGRAFO PARTENDO DA QUESTO GFA?
+print(sg.edges())
 #print(sg)
 
 
+
+#print(g3.neighbors('2'))
+#print(g3.extract_Subgraph_from_neighborhood(nid='2', len=3).nodes())
+#print(g3.extract_Subgraph_from_neighborhood(nid='2', len=3).edges())
+
+#sg=g3.extract_Subgraph_from_neighborhood(nid='2', len=0,)
+#print(sg.nodes())
+#print(sg.edges()) #QUESITO: E' POSSIBILE FAR SI CHE LA FUNZIONE CREI UN SOTTOGRAFO PARTENDO DA QUESTO GFA?
+#print(sg)
 

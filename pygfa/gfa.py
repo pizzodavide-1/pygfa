@@ -14,6 +14,7 @@ import re
 import os
 import warnings
 
+from collections import deque
 import argparse
 import inspect
 
@@ -100,6 +101,12 @@ class GFA(DovetailIterator):
         self._is_rGFA = is_rGFA
         self.PATHLIST=[]
         self.idPaths=[]
+
+    def __len__(self):
+        return len(self.nodes())
+
+    def is_multigraph(self):
+        return True
 
     def __contains__(self, id_):
         try:
@@ -1204,9 +1211,9 @@ class GFA(DovetailIterator):
 
                :param nid: NodeId.
                :param mod: if==1-->creates all edges between all predecessors and successors of the deleted node
-                           if==2-->creates an edge (a,b) (pred,succ) only if 'a' and 'b' are  on a path
+                           if==2-->creates an edge (a,b) (pred,succ) only if 'a' and 'b' are in the same  path(path is a list in self.PATHLIST)
                """
-        if mod != 1 and mod!=2:
+        if mod != 1 and mod!=2 :
             raise ValueError("Value of 'mod' must be 1 or 2")
         if nid not in self.nodes():
             raise ValueError(f"Node with ID {nid} not found in the graph.")
@@ -1217,39 +1224,6 @@ class GFA(DovetailIterator):
             print(f"Node with ID {nid} doesn't have adjacent edges.")
         else:
          if mod==1:
-          edges=self.edges() #contains all edges
-          edgesList = list(edges)
-          nidEdgesList= [] #will contain edge with nid
-          for e in edges:
-             n1= e[0]
-             n2= e[1]
-             if n1==nid or n2==nid:
-                 nidEdgesList.append(e)
-          for i in range(len(nidEdgesList)):
-              edge=nidEdgesList[i]
-              if edge[0] != nid:
-                  fromPos= edge[0]
-              else:
-                  fromPos = edge[1]
-
-              for j in range(len(nidEdgesList)):
-                  if i!=j:
-                     edge2= nidEdgesList[j]
-                     if edge2[0]!=nid:
-                         toPos= edge2[0]
-                     else:
-                         toPos = edge2[1]
-                     if(fromPos < toPos):
-                         edgeTuple=(fromPos,toPos)
-                     else:
-                         edgeTuple=(toPos,fromPos)
-                     if edgeTuple not in edgesList:
-                         edgesList.append(edgeTuple)
-                         self.from_string("L"+"\t"+fromPos+"\t"+"+"+\
-                                          "\t"+toPos+"\t"+"+"+"\t"+"0M")
-          #self.remove_node(nid)
-
-         elif mod==2:
              edges = self.edges()  # contains all edges
              edgesList = list(edges)
              nidEdgesList = []  # will contain edge with nid
@@ -1259,42 +1233,49 @@ class GFA(DovetailIterator):
                  if n1 == nid or n2 == nid:
                      nidEdgesList.append(e)
 
-             for i in range(0 , len(nidEdgesList)):
-                 edge1 = self.get('virtual_' + str(i))
-                 frompos=edge1['from_node']
-                 topos=edge1['to_node']
-                 fromorn= edge1['from_orn']
-                 toorn= edge1['to_orn']
-                 for j in range(len(nidEdgesList)):
-                     if i != j: 
-                         edge2=self.get('virtual_'+str(j))
-                         frompos2=edge2['from_node']
-                         topos2=edge2['to_node']
-                         fromorn2 = edge2['from_orn']
-                         toorn2 = edge2['to_orn']
-                         if frompos==nid and topos2==nid:
-                             if topos < frompos2: #in self.edges,edges are (a,b) where a<b
-                              if ((topos, frompos2)) not in edgesList: #check if the arch already exists
-                               self.from_string("L"+"\t"+topos+"\t"+toorn+"\t"\
-                                                +frompos2+"\t"+fromorn2+"\t"+"0M")
-                               edgesList.append((topos , frompos2))
-                              elif frompos2<topos: #in self.edges,edges are (a,b) where a<b
-                               if ((frompos2, topos)) not in edgesList: #check if the arch already exists
-                                 self.from_string("L" + "\t" + topos + "\t" + toorn + "\t" +\
-                                                  frompos2 + "\t" + fromorn2 + "\t" + "0M")
-                                 edgesList.append((frompos2, topos))
+             for i in range(len(nidEdgesList)):
+                 edge = nidEdgesList[i]
+                 if edge[0] != nid:
+                     fromPos = edge[0]
+                 else:
+                     fromPos = edge[1]
 
-                         elif topos==nid and frompos2==nid:
-                                 if frompos < topos2:
-                                   if((frompos, topos2)) not in edgesList: #in self.edges,edges are (a,b) where a<b
-                                    self.from_string("L"+"\t"+frompos+"\t"+fromorn+"\t"+topos2+"\t"+\
-                                                     toorn2+"\t"+"0M")
-                                    edgesList.append((frompos, topos2))
-                                 elif topos2<frompos: #in self.edges,edges are (a,b) where a<b
-                                   if ((topos2, frompos)) not in edgesList:
-                                    self.from_string( "L" + "\t" + frompos + "\t" + fromorn + "\t" +\
-                                                      topos2 + "\t" + toorn2 + "\t" + "0M")
-                                    edgesList.append((topos2, frompos))
+                 for j in range(len(nidEdgesList)):
+                     if i != j:
+                         edge2 = nidEdgesList[j]
+                         if edge2[0] != nid:
+                             toPos = edge2[0]
+                         else:
+                             toPos = edge2[1]
+
+                         if (fromPos, toPos) not in edgesList and (toPos,fromPos)not in edgesList:
+                             edgesList.append((fromPos,toPos))
+                             self.from_string("L" + "\t" + fromPos + "\t" + "+" + \
+                                              "\t" + toPos + "\t" + "+" + "\t" + "0M")
+         elif mod==2:
+            edges=self.edges()
+
+            for path in self.PATHLIST:
+                cont=0
+                for tuple in path:
+                    if nid ==tuple[0]:
+                      nid_index=cont
+                      if nid_index>0:
+                        predecessor=path[cont-1]
+                        nid_predecessor=predecessor[0]
+                      else:
+                        nid_predecessor=None
+                      if nid_index<len(path)-1:
+                        successor=path[cont+1]
+                        nid_successor=successor[0]
+                      else:
+                        nid_successor=None
+                      if nid_predecessor != None and nid_successor != None:
+                          if (nid_predecessor, nid_successor) not in edges and (nid_successor, nid_predecessor) not in edges:
+                              self.from_string("L" + "\t" + nid_predecessor + "\t+\t" + nid_successor + "\t+"  \
+                                               +  "\t" + "0M")
+                    cont=cont+1
+
         self.remove_node(nid)
 
     def paths(self):
@@ -1314,7 +1295,7 @@ class GFA(DovetailIterator):
             dict[id_path] = path
         return dict
 
-    def extract_Subgraph_from_neighborhood(self, nid , len ):
+    def get_Subgraph_from_neighborhood(self, nid , len ):
         """""
         returns a GFA representing the subgraph created from the
          neighborhood of length 'len' from the node 'nid'
@@ -1343,9 +1324,58 @@ class GFA(DovetailIterator):
                         sg.add_edge("L\t"+mainNode['nid']+"\t+\t"+currentNode['nid']+"\t-"+"\t0M")
                         edges.append((node,neighbor))
             #nodes.extend(neighborList)
-
         return sg
 
+    def get_subgraph_between_nodes(self,source, destination,orientation):
+        """""
+                It use _found_paths to found the paths from source to destination (P-LINE)
+               returns a GFA representing the subgraph created between the
+                source node and the destination node
+                It will contain all nodes and edges that allow to go to source to destination and vicecersa
+                param:
+                -source: source node
+                -destination: destination node
+                -orientation: if True it's based on the orientations of the arcs
+                              if False does not consider the orientations of the arcs 
+                              (therefore get_subgraph_between_nodes(A,B,False) is the same to get_subgraph-+...(B,A,False)
+         """""
+        sg=GFA()
+        paths= [[tupla[0] for tupla in path] for path in self.PATHLIST]
+        if orientation == False:
+            for path in paths:
+                if ((path[0] == source and path[len(path)-1]==destination))or((path[0]==destination and path[len(path)-1]==source)):
+                    for i in range(0, len(path)):
+                        nid=path[i]
+                        node=self.get(str(nid))
+                        #add node
+                        if nid not in sg.nodes():
+                            sg.add_node("S\t" + node['nid'] + "\t" + node['sequence'])
+                        if i+1<len(path):
+                            nid2=path[i+1]
+                            node2=self.get(str(nid2))
+                            if(nid2 not in sg.nodes()):
+                             sg.add_node("S\t" + node2['nid'] + "\t" + node2['sequence'])
+                        if((nid,nid2)not in sg.edges() or (nid2, nid) not in sg.edges()):
+                            if not(nid==nid2):
+                                sg.add_edge("L\t" + node['nid'] + "\t+\t" + node2['nid'] + "\t-" + "\t0M")
+        elif orientation== True:
+            for path in paths:
+                if ((path[0] == source and path[len(path) - 1] == destination)):
+                    for i in range(0, len(path)):
+                        nid = path[i]
+                        node = self.get(str(nid))
+                        # add node
+                        if nid not in sg.nodes():
+                            sg.add_node("S\t" + node['nid'] + "\t" + node['sequence'])
+                        if i + 1 < len(path):
+                            nid2 = path[i + 1]
+                            node2 = self.get(str(nid2))
+                            if (nid2 not in sg.nodes()):
+                                sg.add_node("S\t" + node2['nid'] + "\t" + node2['sequence'])
+                        if ((nid, nid2) not in sg.edges() or (nid2, nid) not in sg.edges()):
+                            if not (nid == nid2):
+                                sg.add_edge("L\t" + node['nid'] + "\t+\t" + node2['nid'] + "\t-" + "\t0M")
+        return sg
 
 if __name__ == '__main__': #pragma: no cover
     pass
